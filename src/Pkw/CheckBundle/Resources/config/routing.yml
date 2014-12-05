@@ -1,0 +1,6 @@
+admin:
+    resource:                           "@PkwCheckBundle/Controller/SecuredController.php"
+    type:                               annotation
+
+homepage:
+    resource:                           "@PkwCheckBundle/Resources/config/routing/Results/homepage.yml"

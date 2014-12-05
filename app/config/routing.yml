@@ -1,0 +1,2 @@
+_pkw_check:
+    resource: "@PkwCheckBundle/Resources/config/routing.yml"

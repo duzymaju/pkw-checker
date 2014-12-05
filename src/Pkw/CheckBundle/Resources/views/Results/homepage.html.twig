@@ -1,0 +1,20 @@
+{% extends 'PkwCheckBundle::layout.html.twig' %}
+
+{% block title %}Wyniki{% endblock %}
+
+{% block content_header '' %}
+
+{% block content %}
+    <p>Ilość województw: {{ provincesNumber }}</p>
+    <p>Ilość powiatów: {{ districtsNumber }}</p>
+    <p>Ilość gmin: {{ communitiesNumber }}</p>
+
+    <div>
+        Lista województw:
+        <ul>
+            {% for province in provinces %}
+                <li>{{ province.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

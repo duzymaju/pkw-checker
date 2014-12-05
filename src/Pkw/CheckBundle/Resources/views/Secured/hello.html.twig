@@ -1,0 +1,9 @@
+{% extends "PkwCheckBundle:Secured:layout.html.twig" %}
+
+{% block title "Hello " ~ user.username %}
+
+{% block content %}
+    <h1 class="title">Hello {{ user.username }}!</h1>
+
+    <a href="{{ path('admin_hello_admin') }}">Hello resource secured for <strong>admin</strong> only.</a>
+{% endblock %}

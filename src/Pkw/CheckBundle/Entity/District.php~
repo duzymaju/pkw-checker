@@ -1,0 +1,66 @@
+<?php
+
+namespace Pkw\CheckBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Entity
+ *
+ * @ORM\Entity(
+ *      repositoryClass = "Pkw\CheckBundle\Entity\Repository\DistrictRepository"
+ * )
+ * @ORM\Table(
+ *      name = "district"
+ * )
+ */
+class District
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "id",
+     *      type = "integer"
+     * )
+     * @ORM\Id
+     */
+    protected $id;
+
+    // ----------
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(
+     *      name = "name",
+     *      type = "string",
+     * )
+     */
+    protected $name;
+
+    /**
+     * @var Province
+     *
+     * @ORM\ManyToOne(
+     *      inversedBy = "districts",
+     *      targetEntity = "Province"
+     * )
+     */
+    protected $province;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(
+     *      cascade = {
+     *          "PERSIST",
+     *          "REMOVE",
+     *      },
+     *      mappedBy = "district",
+     *      targetEntity = "Community"
+     * )
+     */
+    protected $communities;
+}

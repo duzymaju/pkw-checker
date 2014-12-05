@@ -1,0 +1,165 @@
+<?php
+
+namespace Pkw\CheckBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Entity
+ *
+ * @ORM\Entity(
+ *      repositoryClass = "Pkw\CheckBundle\Entity\Repository\CommunityRepository"
+ * )
+ * @ORM\Table(
+ *      name = "community"
+ * )
+ */
+class Community
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "id",
+     *      type = "integer"
+     * )
+     * @ORM\Id
+     */
+    protected $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(
+     *      name = "name",
+     *      type = "string",
+     * )
+     */
+    protected $name;
+
+    /**
+     * @var District
+     *
+     * @ORM\ManyToOne(
+     *      inversedBy = "communities",
+     *      targetEntity = "District"
+     * )
+     */
+    protected $district;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(
+     *      cascade = {
+     *          "PERSIST",
+     *          "REMOVE",
+     *      },
+     *      mappedBy = "community",
+     *      targetEntity = "Constituency"
+     * )
+     */
+    protected $constituencies;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->constituencies = new ArrayCollection();
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name name
+     *
+     * @return self
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set district
+     *
+     * @param District $district district
+     * 
+     * @return self
+     */
+    public function setDistrict(District $district = null)
+    {
+        $this->district = $district;
+
+        return $this;
+    }
+
+    /**
+     * Get district
+     *
+     * @return District 
+     */
+    public function getDistrict()
+    {
+        return $this->district;
+    }
+
+    /**
+     * Add constituencies
+     *
+     * @param Constituency $constituencies constituencies
+     * 
+     * @return self
+     */
+    public function addConstituency(Constituency $constituencies)
+    {
+        $this->constituencies[] = $constituencies;
+
+        return $this;
+    }
+
+    /**
+     * Remove constituencies
+     *
+     * @param Constituency $constituencies
+     */
+    public function removeConstituency(Constituency $constituencies)
+    {
+        $this->constituencies->removeElement($constituencies);
+    }
+
+    /**
+     * Get constituencies
+     *
+     * @return Collection
+     */
+    public function getConstituencies()
+    {
+        return $this->constituencies;
+    }
+}

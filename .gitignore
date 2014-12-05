@@ -1,0 +1,46 @@
+# SCM
+.arch-params
+.bzr
+CVS
+_darcs
+.git
+.hg
+.monotone
+.svn
+
+# Junk
+.DS_Store
+Thumbs.db
+
+
+# PHPUnit
+/report/*
+
+# Vagrant
+/vagrant/.vagrant
+
+
+# Symfony
+/app/bootstrap.php.cache
+/app/cache/*
+/app/config/credencials.yml
+/app/config/parameters.yml
+/app/logs/*
+/app/sessions/*
+/public_html/assetic/*
+/public_html/bundles/*
+/vendor/*
+
+# Common project
+/public_html/css/x-default.min.css
+/public_html/css/x-admin.min.css
+/public_html/css/x-pdf.min.css
+/public_html/js/x-ancient-html5shiv.min.js
+/public_html/js/x-default.min.js
+/public_html/js/x-admin.min.js
+
+# Current project
+/public_html/css/api/*
+/public_html/download/*
+/public_html/images/api/*
+/public_html/js/api/*

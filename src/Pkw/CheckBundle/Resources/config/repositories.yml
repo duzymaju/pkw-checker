@@ -1,0 +1,39 @@
+services:
+    pkw_check.alias.manager_service:
+        alias:                          doctrine
+
+    pkw_check.repository.community:
+        arguments:
+            -                           Pkw\CheckBundle\Entity\Community
+        class:                          Pkw\CheckBundle\Entity\Repository\CommunityRepository
+        factory_method:                 getRepository
+        factory_service:                pkw_check.alias.manager_service
+
+    pkw_check.repository.constituency:
+        arguments:
+            -                           Pkw\CheckBundle\Entity\Constituency
+        class:                          Pkw\CheckBundle\Entity\Repository\ConstituencyRepository
+        factory_method:                 getRepository
+        factory_service:                pkw_check.alias.manager_service
+
+    pkw_check.repository.district:
+        arguments:
+            -                           Pkw\CheckBundle\Entity\District
+        class:                          Pkw\CheckBundle\Entity\Repository\DistrictRepository
+        factory_method:                 getRepository
+        factory_service:                pkw_check.alias.manager_service
+
+    pkw_check.repository.polling_station:
+        arguments:
+            -                           Pkw\CheckBundle\Entity\PollingStation
+        class:                          Pkw\CheckBundle\Entity\Repository\PollingStationRepository
+        factory_method:                 getRepository
+        factory_service:                pkw_check.alias.manager_service
+
+    pkw_check.repository.province:
+        arguments:
+            -                           Pkw\CheckBundle\Entity\Province
+        class:                          Pkw\CheckBundle\Entity\Repository\ProvinceRepository
+        factory_method:                 getRepository
+        factory_service:                pkw_check.alias.manager_service
+

@@ -1,0 +1,6 @@
+homepage:
+    path:                               /
+    defaults:
+        _controller:                    PkwCheckBundle:Results:homepage
+    requirements:
+        _method:                        GET

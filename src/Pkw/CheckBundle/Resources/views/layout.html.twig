@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="{{ _charset }}" />
+        <meta name="robots" content="noindex,nofollow" />
+        <title>{% block title %}PKW Check Bundle{% endblock %}</title>
+        {% block head %}
+            <link rel="icon" sizes="16x16" href="{{ asset('favicon.ico') }}" />
+            <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon-iphone.png') }}" />
+            <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon-ipad.png') }}" sizes="72x72" />
+            <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon-iphone.png') }}" sizes="114x114" />
+            <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon-ipad.png') }}" sizes="144x144" />
+            <link rel="stylesheet" href="{{ asset('css/main.css') }}" />
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="flash-message">{{ flashMessage }}</div>
+            {% endfor %}
+
+            {% block content_header %}
+                <ul id="menu">
+                        {% block content_header_more %}
+                            <li><a href="{{ path('homepage') }}">Strona główna</a></li>
+                        {% endblock %}
+                    </ul>
+
+                <div style="clear:both"></div>
+            {% endblock %}
+
+            <div id="content">
+                {% block content %}{% endblock %}
+            </div>
+        {% endblock %}
+    </body>
+</html>
+

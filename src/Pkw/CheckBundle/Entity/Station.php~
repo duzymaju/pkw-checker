@@ -1,0 +1,169 @@
+<?php
+
+namespace Pkw\CheckBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Entity
+ *
+ * @ORM\Entity(
+ *      repositoryClass = "Pkw\CheckBundle\Entity\Repository\StationRepository"
+ * )
+ * @ORM\Table(
+ *      name = "station",
+ *      uniqueConstraints = {
+ *          @ORM\UniqueConstraint(
+ *              columns = {
+ *                  "key"
+ *              },
+ *              name = "L_UNIQUE_IDX_1"
+ *          )
+ *      }
+ * )
+ */
+class Station
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "id",
+     *      type = "integer"
+     * )
+     * @ORM\Id
+     * @ORM\GeneratedValue(
+     *      strategy = "AUTO"
+     * )
+     */
+    protected $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(
+     *      name = "number",
+     *      type = "integer",
+     * )
+     */
+    protected $number;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(
+     *      length = 32,
+     *      name = "`key`",
+     *      options = {
+     *          "fixed" = true
+     *      },
+     *      type = "string"
+     * )
+     */
+    protected $key;
+
+    /**
+     * @var Constituency
+     *
+     * @ORM\ManyToOne(
+     *      inversedBy = "stations",
+     *      targetEntity = "Constituency"
+     * )
+     */
+    protected $constituency;
+
+    /**
+     * Get ID
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set number
+     *
+     * @param integer $number
+     *
+     * @return self
+     */
+    public function setNumber($number)
+    {
+        $this->number = $number;
+
+        return $this;
+    }
+
+    /**
+     * Get number
+     *
+     * @return integer 
+     */
+    public function getNumber()
+    {
+        return $this->number;
+    }
+
+    /**
+     * Set key
+     *
+     * @param string $key
+     *
+     * @return self
+     */
+    public function setKey($key)
+    {
+        $this->key = $key;
+
+        return $this;
+    }
+
+    /**
+     * Get key
+     *
+     * @return string 
+     */
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    /**
+     * Set constituency
+     *
+     * @param Constituency $constituency
+     *
+     * @return self
+     */
+    public function setConstituency(Constituency $constituency = null)
+    {
+        $this->constituency = $constituency;
+
+        return $this;
+    }
+
+    /**
+     * Get constituency
+     *
+     * @return Constituency
+     */
+    public function getConstituency()
+    {
+        return $this->constituency;
+    }
+
+    /**
+     * Set id
+     *
+     * @param integer $id
+     * @return Station
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+}
