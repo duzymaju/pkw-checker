@@ -49,6 +49,26 @@ class District
     protected $province;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "electorates_number",
+     *      type = "integer",
+     * )
+     */
+    protected $electoratesNumber;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "polling_stations_number",
+     *      type = "integer",
+     * )
+     */
+    protected $pollingStationsNumber;
+
+    /**
      * @var ArrayCollection
      *
      * @ORM\OneToMany(
@@ -140,6 +160,54 @@ class District
     public function getProvince()
     {
         return $this->province;
+    }
+
+    /**
+     * Set electorates number
+     *
+     * @param integer $electoratesNumber electorates number
+     *
+     * @return self
+     */
+    public function setElectoratesNumber($electoratesNumber)
+    {
+        $this->electoratesNumber = $electoratesNumber;
+
+        return $this;
+    }
+
+    /**
+     * Get electorates number
+     *
+     * @return integer
+     */
+    public function getElectoratesNumber()
+    {
+        return $this->electoratesNumber;
+    }
+
+    /**
+     * Set polling stations number
+     *
+     * @param integer $pollingStationsNumber polling stations number
+     *
+     * @return self
+     */
+    public function setPollingStationsNumber($pollingStationsNumber)
+    {
+        $this->pollingStationsNumber = $pollingStationsNumber;
+
+        return $this;
+    }
+
+    /**
+     * Get polling stations number
+     *
+     * @return integer
+     */
+    public function getPollingStationsNumber()
+    {
+        return $this->pollingStationsNumber;
     }
 
     /**

@@ -12,14 +12,17 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 /**
  * Command
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class CrawlerCommand extends ContainerAwareCommand
 {
     /** @const string */
-    const MAIN_URL = 'http://wybory2010.pkw.gov.pl/geo/pl/000000.html';
+    const MAIN_URL = 'http://wybory2014.pkw.gov.pl/pl/';
 
     /** @var EntityManager */
     protected $em;
@@ -76,29 +79,47 @@ class CrawlerCommand extends ContainerAwareCommand
     protected function updateProvincesData($url)
     {
         $webpageManager = new WebpageManager($url);
-        $elements = $webpageManager->getElements('#tabs-3 table.geo td.details a.tablist');
+        $elements = $webpageManager->getElements('#content div.states tbody td.nazwa a');
 
         /** @var DOMElement $element */
         foreach ($elements as $element) {
             $url = $element->getAttribute('href');
-            $id = (integer) substr($url, 0, 6);
-            $residentsNumber = $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE);
-            $electoratesNumber = $this->getNextNode($residentsNumber, 1, XML_ELEMENT_NODE);
-            $districtsNumber = $this->getNextNode($electoratesNumber, 3, XML_ELEMENT_NODE);
-            $communitiesNumber = $this->getNextNode($districtsNumber, 1, XML_ELEMENT_NODE);
+            $id = $this->getIdFromUrl($url);
+            $electoratesNumber = $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE);
+            $pollingStationsNumber = $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE);
 
-            $province = new Province();
-            $province->setId($id)
-                ->setName(trim(strip_tags($element->nodeValue), ' *'))
-                ->setResidentsNumber($this->parseInteger($residentsNumber->nodeValue))
-                ->setElectoratesNumber($this->parseInteger($electoratesNumber->nodeValue))
-                ->setDistrictsNumber($this->parseInteger($districtsNumber->nodeValue))
-                ->setCommunitiesNumber($this->parseInteger($communitiesNumber->nodeValue));
-            $this->em->persist($province);
-            $this->output->writeln(sprintf('Province "%s" added', $province->getName()));
-
-            $this->updateDistrictsData($province, $webpageManager, $url);
+            $this->updateProvinceData($webpageManager, $url, $id, $this->parseString($element->nodeValue),
+                $this->parseInteger($electoratesNumber->nodeValue),
+                $this->parseInteger($pollingStationsNumber->nodeValue));
         }
+
+        return $this;
+    }
+
+    /**
+     * Updates province data
+     *
+     * @param WebpageManager $webpageManager        webpage manager
+     * @param string         $url                   URL
+     * @param integer        $id                    ID
+     * @param string         $name                  name
+     * @param integer        $electoratesNumber     electorates number
+     * @param integer        $pollingStationsNumber pollingStations number
+     *
+     * @return self
+     */
+    protected function updateProvinceData(WebpageManager $webpageManager, $url, $id, $name, $electoratesNumber,
+        $pollingStationsNumber)
+    {
+        $province = new Province();
+        $province->setId($id)
+            ->setName($name)
+            ->setElectoratesNumber($electoratesNumber)
+            ->setPollingStationsNumber($pollingStationsNumber);
+        $this->em->persist($province);
+        $this->output->writeln(sprintf('Province "%s" (ID %d) added', $province->getName(), $id));
+
+        $this->updateDistrictsData($province, $webpageManager, $url);
 
         return $this;
     }
@@ -115,28 +136,55 @@ class CrawlerCommand extends ContainerAwareCommand
     protected function updateDistrictsData(Province $province, WebpageManager $parent, $url)
     {
         $webpageManager = new WebpageManager($url, $parent);
-        $elements = $webpageManager->getElements('#tabs-3 table.geo td.details a.tablist');
+        $elements = $webpageManager->getElements('#substates tbody td.nazwa a');
 
         /** @var DOMElement $element */
         foreach ($elements as $element) {
             $url = $element->getAttribute('href');
-            $id = (integer) substr($url, 0, 6);
+            $id = $this->getIdFromUrl($url);
+            $electoratesNumber = $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE);
+            $pollingStationsNumber = $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE);
 
-            $district = new District();
-            $district->setId($id)
-                ->setName(trim(strip_tags($element->nodeValue), ' *'))
-                ->setProvince($province);
-            $this->em->persist($district);
-            $this->output->writeln(sprintf('    District "%s" added', $district->getName()));
-
-            $this->updateCommunitiesData($district, $webpageManager, $url);
+            $this->updateDistrictData($webpageManager, $province, $url, $id, $this->parseString($element->nodeValue),
+                $this->parseInteger($electoratesNumber->nodeValue),
+                $this->parseInteger($pollingStationsNumber->nodeValue));
         }
 
         return $this;
     }
 
     /**
-     * Updates districts' data
+     * Updates district data
+     *
+     * @param WebpageManager $webpageManager        webpage manager
+     * @param Province       $province              province
+     * @param string         $url                   URL
+     * @param integer        $id                    ID
+     * @param string         $name                  name
+     * @param integer        $electoratesNumber     electorates number
+     * @param integer        $pollingStationsNumber pollingStations number
+     *
+     * @return self
+     */
+    protected function updateDistrictData(WebpageManager $webpageManager, Province $province, $url, $id, $name,
+        $electoratesNumber, $pollingStationsNumber)
+    {
+        $district = new District();
+        $district->setId($id)
+            ->setName($name)
+            ->setProvince($province)
+            ->setElectoratesNumber($electoratesNumber)
+            ->setPollingStationsNumber($pollingStationsNumber);
+        $this->em->persist($district);
+        $this->output->writeln(sprintf('    District "%s" (ID %d) added', $district->getName(), $id));
+
+        $this->updateCommunitiesData($district, $webpageManager, $url);
+
+        return $this;
+    }
+
+    /**
+     * Updates communities' data
      *
      * @param District       $district district
      * @param WebpageManager $parent   parent
@@ -146,26 +194,87 @@ class CrawlerCommand extends ContainerAwareCommand
      */
     protected function updateCommunitiesData(District $district, WebpageManager $parent, $url)
     {
-        $webpageManager = new WebpageManager($url, $parent);
-        $elements = $webpageManager->getElements('#tabs-1 table.geo td.details a.tablist');
+        try {
+            $webpageManager = new WebpageManager($url, $parent);
+        } catch (ResourceNotFoundException $e) {
+            $this->output->writeln($e->getMessage(), OutputInterface::OUTPUT_RAW);
+            return $this;
+        }
 
-        /** @var DOMElement $element */
-        foreach ($elements as $element) {
-            $url = $element->getAttribute('href');
-            $id = (integer) substr($url, 0, 6);
+        if ($webpageManager->getRedirectCount() == 1 || $this->getIdFromUrl($webpageManager->getHost()) > 9999) {
+            $url = $webpageManager->getFileName();
+            $id = $this->getIdFromUrl($url);
+            $elements = $webpageManager->getElements('#wrap div.navi span:last-child');
+            $element = $this->getNextNode($elements->getNode(0), 1, XML_TEXT_NODE);
 
-            $community = new Community();
-            $community->setId($id)
-                ->setName(trim(strip_tags($element->nodeValue), ' *'))
-                ->setDistrict($district);
-            $this->em->persist($community);
-            $this->output->writeln(sprintf('        Community "%s" added', $community->getName()));
+            $this->updateCommunityData($webpageManager, $district, $url, $id, $this->parseString($element->nodeValue),
+                Community::TYPE_CITY);
+        } else {
+            $elements = $webpageManager->getElements('#area area');
+            $ids = array();
 
-            //$this->updateCommunitiesData($district, $webpageManager, $url);
+            /** @var DOMElement $element */
+            foreach ($elements as $element) {
+                $url = $element->getAttribute('href');
+                $id = $this->getIdFromUrl($url);
+                $title = $element->getAttribute('title');
+
+                if (!in_array($id, $ids)) {
+                    $this->updateCommunityData($webpageManager, $district, $url, $id, $title);
+                    $ids[] = $id;
+                }
+            }
         }
 
         return $this;
     }
+
+    /**
+     * Updates community data
+     *
+     * @param WebpageManager $webpageManager webpage manager
+     * @param District       $district       district
+     * @param string         $url            URL
+     * @param integer        $id             ID
+     * @param string         $name           name
+     * @param integer|null   $type           type
+     *
+     * @return self
+     */
+    protected function updateCommunityData(WebpageManager $webpageManager, District $district, $url, $id, $name,
+        $type = null)
+    {
+        if (empty($type)) {
+            $type = preg_match('#, m.$#', $name) ? Community::TYPE_CITY : Community::TYPE_COMMUNITY;
+        }
+
+        $community = new Community();
+        $community->setId($id)
+            ->setName(preg_replace('#, [a-z]+\.?$#', '', $name))
+            ->setType($type)
+            ->setDistrict($district);
+        $this->em->persist($community);
+        $this->output->writeln(sprintf('        Community "%s" (ID %d%s) added', $community->getName(), $id,
+            $community->getType() == Community::TYPE_CITY ? ', city' : ''));
+
+        //$this->updateConstituenciesData($community, $webpageManager, $url);
+
+        return $this;
+    }
+
+    /**r
+     * Updates constituencies' data
+     *
+     * @param Community      $community community
+     * @param WebpageManager $parent    parent
+     * @param string         $url       URL
+     *
+     * @return self
+     */
+//    protected function updateConstituenciesData(Community $community, WebpageManager $parent, $url)
+//    {
+//
+//    }
 
     /**
      * Get next node
@@ -200,5 +309,34 @@ class CrawlerCommand extends ContainerAwareCommand
         $value = (integer) preg_replace('#[^0-9]#', '', $value);
 
         return $value;
+    }
+
+    /**
+     * Parse string
+     *
+     * @param mixed $value value
+     *
+     * @return string
+     */
+    protected function parseString($value)
+    {
+        $value = trim(strip_tags($value));
+
+        return $value;
+    }
+
+    /**
+     * Get ID from URL
+     *
+     * @param string $url URL
+     *
+     * @return integer
+     */
+    protected function getIdFromUrl($url)
+    {
+        $parts = explode('/', $url);
+        $id = $this->parseInteger(array_pop($parts));
+
+        return $id;
     }
 }

@@ -3,7 +3,6 @@
 namespace Pkw\CheckBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,6 +17,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Community
 {
+    /** @const integer */
+    const TYPE_CITY = 1;
+
+    /** @const integer */
+    const TYPE_COMMUNITY = 2;
+
     /**
      * @var integer
      *
@@ -38,6 +43,16 @@ class Community
      * )
      */
     protected $name;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "type",
+     *      type = "integer",
+     * )
+     */
+    protected $type;
 
     /**
      * @var District
@@ -72,7 +87,21 @@ class Community
     }
 
     /**
-     * Get id
+     * Set ID
+     *
+     * @param integer $id ID
+     *
+     * @return self
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Get ID
      *
      * @return integer 
      */
@@ -130,33 +159,33 @@ class Community
     }
 
     /**
-     * Add constituencies
+     * Add constituency
      *
-     * @param Constituency $constituencies constituencies
+     * @param Constituency $constituency constituency
      * 
      * @return self
      */
-    public function addConstituency(Constituency $constituencies)
+    public function addConstituency(Constituency $constituency)
     {
-        $this->constituencies[] = $constituencies;
+        $this->constituencies[] = $constituency;
 
         return $this;
     }
 
     /**
-     * Remove constituencies
+     * Remove constituency
      *
-     * @param Constituency $constituencies
+     * @param Constituency $constituency constituency
      */
-    public function removeConstituency(Constituency $constituencies)
+    public function removeConstituency(Constituency $constituency)
     {
-        $this->constituencies->removeElement($constituencies);
+        $this->constituencies->removeElement($constituency);
     }
 
     /**
      * Get constituencies
      *
-     * @return Collection
+     * @return ArrayCollection
      */
     public function getConstituencies()
     {

@@ -17,6 +17,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Community
 {
+    /** @const integer */
+    const TYPE_CITY = 1;
+
+    /** @const integer */
+    const TYPE_COMMUNITY = 2;
+
     /**
      * @var integer
      *
@@ -37,6 +43,16 @@ class Community
      * )
      */
     protected $name;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "type",
+     *      type = "smallint",
+     * )
+     */
+    protected $type;
 
     /**
      * @var District
@@ -116,6 +132,29 @@ class Community
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set type
+     *
+     * @param integer $type
+     * @return Community
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return integer
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**

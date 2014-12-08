@@ -42,16 +42,6 @@ class Province
      * @var integer
      *
      * @ORM\Column(
-     *      name = "residents_number",
-     *      type = "integer",
-     * )
-     */
-    protected $residentsNumber;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(
      *      name = "electorates_number",
      *      type = "integer",
      * )
@@ -62,21 +52,11 @@ class Province
      * @var integer
      *
      * @ORM\Column(
-     *      name = "districts_number",
+     *      name = "polling_stations_number",
      *      type = "integer",
      * )
      */
-    protected $districtsNumber;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(
-     *      name = "communities_number",
-     *      type = "integer",
-     * )
-     */
-    protected $communitiesNumber;
+    protected $pollingStationsNumber;
 
     /**
      * @var ArrayCollection
@@ -149,30 +129,6 @@ class Province
     }
 
     /**
-     * Set residents number
-     *
-     * @param integer $residentsNumber residents number
-     *
-     * @return self
-     */
-    public function setResidentsNumber($residentsNumber)
-    {
-        $this->residentsNumber = $residentsNumber;
-
-        return $this;
-    }
-
-    /**
-     * Get residents number
-     *
-     * @return integer
-     */
-    public function getResidentsNumber()
-    {
-        return $this->residentsNumber;
-    }
-
-    /**
      * Set electorates number
      *
      * @param integer $electoratesNumber electorates number
@@ -197,51 +153,27 @@ class Province
     }
 
     /**
-     * Set districts number
+     * Set polling stations number
      *
-     * @param integer $districtsNumber districts number
+     * @param integer $pollingStationsNumber polling stations number
      *
      * @return self
      */
-    public function setDistrictsNumber($districtsNumber)
+    public function setPollingStationsNumber($pollingStationsNumber)
     {
-        $this->districtsNumber = $districtsNumber;
+        $this->pollingStationsNumber = $pollingStationsNumber;
 
         return $this;
     }
 
     /**
-     * Get districts number
+     * Get polling stations number
      *
      * @return integer
      */
-    public function getDistrictsNumber()
+    public function getPollingStationsNumber()
     {
-        return $this->districtsNumber;
-    }
-
-    /**
-     * Set communities number
-     *
-     * @param integer $communitiesNumber communities number
-     *
-     * @return self
-     */
-    public function setCommunitiesNumber($communitiesNumber)
-    {
-        $this->communitiesNumber = $communitiesNumber;
-
-        return $this;
-    }
-
-    /**
-     * Get communities number
-     *
-     * @return integer
-     */
-    public function getCommunitiesNumber()
-    {
-        return $this->communitiesNumber;
+        return $this->pollingStationsNumber;
     }
 
     /**
