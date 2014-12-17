@@ -30,6 +30,9 @@ class CrawlerCommand extends ContainerAwareCommand
     /** @var OutputInterface $output */
     protected $output;
 
+    /** @var array */
+    protected $errors = [];
+
     /**
      * {@inheritdoc}
      */
@@ -66,6 +69,10 @@ class CrawlerCommand extends ContainerAwareCommand
         }
 
         $this->updateProvincesData(self::MAIN_URL);
+        $this->displayErrors();
+        if (!$input->getOption('truncate')) {
+            $this->output->writeln('You didn\'t truncate database so primary key duplications are possible!');
+        }
         $this->em->flush();
     }
 
@@ -198,6 +205,7 @@ class CrawlerCommand extends ContainerAwareCommand
             $webpageManager = new WebpageManager($url, $parent);
         } catch (ResourceNotFoundException $e) {
             $this->output->writeln($e->getMessage(), OutputInterface::OUTPUT_RAW);
+            $this->addError('districts', sprintf('%s (%s)', $district->getName(), $url));
             return $this;
         }
 
@@ -275,6 +283,31 @@ class CrawlerCommand extends ContainerAwareCommand
 //    {
 //
 //    }
+
+    /**
+     * Add error
+     *
+     * @param string $type  type
+     * @param string $value value
+     */
+    protected function addError($type, $value)
+    {
+        if (!array_key_exists($type, $this->errors)) {
+            $this->errors[$type] = [];
+        }
+        $this->errors[$type][] = $value;
+    }
+
+    /**
+     * Display errors
+     */
+    protected function displayErrors()
+    {
+        $this->output->writeln("\n" . 'Errors which appeared during data crawling:');
+        foreach ($this->errors as $type => $values) {
+            $this->output->writeln('- ' . $type . ': ' . implode(', ', $values) . '.');
+        }
+    }
 
     /**
      * Get next node
