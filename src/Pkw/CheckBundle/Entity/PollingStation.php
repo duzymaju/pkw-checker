@@ -137,7 +137,7 @@ class PollingStation
      *
      * @return self
      */
-    public function setConstituency(Constituency $constituency = null)
+    public function setConstituency(Constituency $constituency)
     {
         $this->constituency = $constituency;
 

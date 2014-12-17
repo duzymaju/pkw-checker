@@ -65,28 +65,6 @@ class Community
     protected $district;
 
     /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(
-     *      cascade = {
-     *          "PERSIST",
-     *          "REMOVE",
-     *      },
-     *      mappedBy = "community",
-     *      targetEntity = "Constituency"
-     * )
-     */
-    protected $constituencies;
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->constituencies = new ArrayCollection();
-    }
-
-    /**
      * Set ID
      *
      * @param integer $id ID
@@ -138,7 +116,8 @@ class Community
      * Set type
      *
      * @param integer $type
-     * @return Community
+     *
+     * @return self
      */
     public function setType($type)
     {
@@ -164,7 +143,7 @@ class Community
      * 
      * @return self
      */
-    public function setDistrict(District $district = null)
+    public function setDistrict(District $district)
     {
         $this->district = $district;
 
@@ -179,39 +158,5 @@ class Community
     public function getDistrict()
     {
         return $this->district;
-    }
-
-    /**
-     * Add constituency
-     *
-     * @param Constituency $constituency constituency
-     * 
-     * @return self
-     */
-    public function addConstituency(Constituency $constituency)
-    {
-        $this->constituencies[] = $constituency;
-
-        return $this;
-    }
-
-    /**
-     * Remove constituency
-     *
-     * @param Constituency $constituency constituency
-     */
-    public function removeConstituency(Constituency $constituency)
-    {
-        $this->constituencies->removeElement($constituency);
-    }
-
-    /**
-     * Get constituencies
-     *
-     * @return ArrayCollection
-     */
-    public function getConstituencies()
-    {
-        return $this->constituencies;
     }
 }

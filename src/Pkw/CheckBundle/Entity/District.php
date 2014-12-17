@@ -49,6 +49,16 @@ class District
     protected $province;
 
     /**
+     * @var Constituency
+     *
+     * @ORM\ManyToOne(
+     *      inversedBy = "districts",
+     *      targetEntity = "Constituency"
+     * )
+     */
+    protected $constituency;
+
+    /**
      * @var integer
      *
      * @ORM\Column(
@@ -145,7 +155,7 @@ class District
      *
      * @return self
      */
-    public function setProvince(Province $province = null)
+    public function setProvince(Province $province)
     {
         $this->province = $province;
 
@@ -160,6 +170,30 @@ class District
     public function getProvince()
     {
         return $this->province;
+    }
+
+    /**
+     * Set constituency
+     *
+     * @param Constituency $constituency constituency
+     *
+     * @return self
+     */
+    public function setConstituency(Constituency $constituency)
+    {
+        $this->constituency = $constituency;
+
+        return $this;
+    }
+
+    /**
+     * Get constituency
+     *
+     * @return Constituency
+     */
+    public function getConstituency()
+    {
+        return $this->constituency;
     }
 
     /**

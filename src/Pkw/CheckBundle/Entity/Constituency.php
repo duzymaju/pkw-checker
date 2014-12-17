@@ -42,14 +42,18 @@ class Constituency
     protected $number;
 
     /**
-     * @var Community
+     * @var ArrayCollection
      *
-     * @ORM\ManyToOne(
-     *      inversedBy = "constituencies",
-     *      targetEntity = "Community"
+     * @ORM\OneToMany(
+     *      cascade = {
+     *          "PERSIST",
+     *          "REMOVE",
+     *      },
+     *      mappedBy = "constituency",
+     *      targetEntity = "District"
      * )
      */
-    protected $community;
+    protected $districts;
 
     /**
      * @var ArrayCollection
@@ -70,6 +74,7 @@ class Constituency
      */
     public function __construct()
     {
+        $this->districts = new ArrayCollection();
         $this->pollingStations = new ArrayCollection();
     }
 
@@ -108,27 +113,37 @@ class Constituency
     }
 
     /**
-     * Set community
+     * Add district
      *
-     * @param Community $community community
+     * @param District $district district
      *
      * @return self
      */
-    public function setCommunity(Community $community = null)
+    public function addDistrict(District $district)
     {
-        $this->community = $community;
+        $this->districts[] = $district;
 
         return $this;
     }
 
     /**
-     * Get community
+     * Remove district
      *
-     * @return Community
+     * @param District $district district
      */
-    public function getCommunity()
+    public function removeDistrict(District $district)
     {
-        return $this->community;
+        $this->districts->removeElement($district);
+    }
+
+    /**
+     * Get districts
+     *
+     * @return ArrayCollection
+     */
+    public function getDistricts()
+    {
+        return $this->districts;
     }
 
     /**
@@ -136,7 +151,7 @@ class Constituency
      *
      * @param PollingStation $pollingStation polling station
      *
-     * @return Constituency
+     * @return self
      */
     public function addPollingStation(PollingStation $pollingStation)
     {
