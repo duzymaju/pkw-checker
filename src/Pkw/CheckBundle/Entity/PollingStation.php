@@ -32,9 +32,6 @@ class PollingStation
      *      type = "integer"
      * )
      * @ORM\Id
-     * @ORM\GeneratedValue(
-     *      strategy="AUTO"
-     * )
      */
     protected $id;
 
@@ -71,6 +68,20 @@ class PollingStation
      * )
      */
     protected $constituency;
+
+    /**
+     * Set ID
+     *
+     * @param integer $id ID
+     *
+     * @return self
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
 
     /**
      * Get ID

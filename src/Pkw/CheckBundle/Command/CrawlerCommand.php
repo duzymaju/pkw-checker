@@ -4,7 +4,9 @@ namespace Pkw\CheckBundle\Command;
 use Doctrine\ORM\EntityManager;
 use DOMElement;
 use DOMNode;
+use Pkw\CheckBundle\Entity\Committee;
 use Pkw\CheckBundle\Entity\Community;
+use Pkw\CheckBundle\Entity\Constituency;
 use Pkw\CheckBundle\Entity\District;
 use Pkw\CheckBundle\Entity\Province;
 use Pkw\CheckBundle\Manager\WebpageManager;
@@ -86,8 +88,8 @@ class CrawlerCommand extends ContainerAwareCommand
     protected function updateProvincesData($url)
     {
         $webpageManager = new WebpageManager($url);
-        $elements = $webpageManager->getElements('#content div.states tbody td.nazwa a');
 
+        $elements = $webpageManager->getElements('#content div.states tbody td.nazwa a');
         /** @var DOMElement $element */
         foreach ($elements as $element) {
             $url = $element->getAttribute('href');
@@ -113,7 +115,7 @@ class CrawlerCommand extends ContainerAwareCommand
      * @param integer        $electoratesNumber     electorates number
      * @param integer        $pollingStationsNumber pollingStations number
      *
-     * @return self
+     * @return Province
      */
     protected function updateProvinceData(WebpageManager $webpageManager, $url, $id, $name, $electoratesNumber,
         $pollingStationsNumber)
@@ -124,11 +126,11 @@ class CrawlerCommand extends ContainerAwareCommand
             ->setElectoratesNumber($electoratesNumber)
             ->setPollingStationsNumber($pollingStationsNumber);
         $this->em->persist($province);
-        $this->output->writeln(sprintf('Province "%s" (ID %d) added', $province->getName(), $id));
+        $this->output->writeln(sprintf('Province "%s" (ID %d) added', $province->getName(), $province->getId()));
 
         $this->updateDistrictsData($province, $webpageManager, $url);
 
-        return $this;
+        return $province;
     }
 
     /**
@@ -143,8 +145,9 @@ class CrawlerCommand extends ContainerAwareCommand
     protected function updateDistrictsData(Province $province, WebpageManager $parent, $url)
     {
         $webpageManager = new WebpageManager($url, $parent);
-        $elements = $webpageManager->getElements('#substates tbody td.nazwa a');
 
+        $districts = [];
+        $elements = $webpageManager->getElements('#substates tr td.nazwa a');
         /** @var DOMElement $element */
         foreach ($elements as $element) {
             $url = $element->getAttribute('href');
@@ -152,9 +155,37 @@ class CrawlerCommand extends ContainerAwareCommand
             $electoratesNumber = $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE);
             $pollingStationsNumber = $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE);
 
-            $this->updateDistrictData($webpageManager, $province, $url, $id, $this->parseString($element->nodeValue),
-                $this->parseInteger($electoratesNumber->nodeValue),
+            $district = $this->updateDistrictData($webpageManager, $province, $url, $id,
+                $this->parseString($element->nodeValue), $this->parseInteger($electoratesNumber->nodeValue),
                 $this->parseInteger($pollingStationsNumber->nodeValue));
+            $districts[preg_replace('#^m\. #', '', $district->getName())] = $district;
+        }
+
+        $elements = $webpageManager->getElements('#committes tr td:nth-child(3) a');
+        /** @var DOMElement $element */
+        foreach ($elements as $element) {
+            $url = $element->getAttribute('href');
+            $id = $this->getIdFromUrl($url, -2);
+            $name = $this->getPreviousNode($element->parentNode, 1, XML_ELEMENT_NODE);
+
+            $this->updateCommitteeData($webpageManager, $url, $id, $this->parseString($name->nodeValue));
+        }
+
+        $elements = $webpageManager->getElements('#wards tr td:first-child a');
+        /** @var DOMElement $element */
+        foreach ($elements as $element) {
+            $url = $element->getAttribute('href');
+            $id = $this->getIdFromUrl($url);
+            $borders = explode(', ', $this->getNextNode($element->parentNode, 1, XML_ELEMENT_NODE)->nodeValue);
+            foreach ($borders as $i => $border) {
+                $borders[$i] = preg_replace('#^(powiaty?|miast[ao]): #i', '', $border);
+            }
+            $candidatesNumber = $this->getNextNode($element->parentNode, 3, XML_ELEMENT_NODE);
+            $mandatesNumber = $this->getNextNode($element->parentNode, 4, XML_ELEMENT_NODE);
+
+            $this->updateConstituencyData($webpageManager, $districts, $borders, $url, $id,
+                $this->parseInteger($element->nodeValue), $this->parseInteger($candidatesNumber->nodeValue),
+                $this->parseInteger($mandatesNumber->nodeValue));
         }
 
         return $this;
@@ -169,9 +200,9 @@ class CrawlerCommand extends ContainerAwareCommand
      * @param integer        $id                    ID
      * @param string         $name                  name
      * @param integer        $electoratesNumber     electorates number
-     * @param integer        $pollingStationsNumber pollingStations number
+     * @param integer        $pollingStationsNumber polling stations number
      *
-     * @return self
+     * @return District
      */
     protected function updateDistrictData(WebpageManager $webpageManager, Province $province, $url, $id, $name,
         $electoratesNumber, $pollingStationsNumber)
@@ -183,11 +214,69 @@ class CrawlerCommand extends ContainerAwareCommand
             ->setElectoratesNumber($electoratesNumber)
             ->setPollingStationsNumber($pollingStationsNumber);
         $this->em->persist($district);
-        $this->output->writeln(sprintf('    District "%s" (ID %d) added', $district->getName(), $id));
+        $this->output->writeln(sprintf('    District "%s" (ID %d) added', $district->getName(), $district->getId()));
 
         $this->updateCommunitiesData($district, $webpageManager, $url);
 
-        return $this;
+        return $district;
+    }
+
+    /**
+     * Updates committee data
+     *
+     * @param WebpageManager $webpageManager        webpage manager
+     * @param string         $url                   URL
+     * @param integer        $id                    ID
+     * @param string         $name                  name
+     *
+     * @return Committee
+     */
+    protected function updateCommitteeData(WebpageManager $webpageManager, $url, $id, $name)
+    {
+        $committee = new Committee();
+        $committee->setId($id)
+            ->setName($name);
+        $this->em->persist($committee);
+        $this->output->writeln(sprintf('    Committee "%s" (ID %d) added', $committee->getName(), $committee->getId()));
+
+        return $committee;
+    }
+
+    /**
+     * Updates constituency data
+     *
+     * @param WebpageManager $webpageManager   webpage manager
+     * @param array          $districts        districts
+     * @param array          $borders          borders
+     * @param string         $url              URL
+     * @param integer        $id               ID
+     * @param integer        $number           number
+     * @param integer        $candidatesNumber candidates number
+     * @param integer        $mandatesNumber   mandates number
+     *
+     * @return Constituency
+     */
+    protected function updateConstituencyData(WebpageManager $webpageManager, array $districts, array $borders, $url,
+        $id, $number, $candidatesNumber, $mandatesNumber)
+    {
+        $constituency = new Constituency();
+        $constituency->setId($id)
+            ->setNumber($number)
+            ->setCandidatesNumber($candidatesNumber)
+            ->setMandatesNumber($mandatesNumber);
+        $this->em->persist($constituency);
+        $this->output->writeln(sprintf('    Constituency no %d (ID %d) added', $constituency->getNumber(),
+            $constituency->getId()));
+
+        foreach ($districts as $district) {
+            /** @var District $district */
+            if (in_array($district->getName(), $borders)) {
+                $district->setConstituency($constituency);
+                $this->em->persist($district);
+            }
+        }
+
+        return $constituency;
     }
 
     /**
@@ -247,7 +336,7 @@ class CrawlerCommand extends ContainerAwareCommand
      * @param string         $name           name
      * @param integer|null   $type           type
      *
-     * @return self
+     * @return Community
      */
     protected function updateCommunityData(WebpageManager $webpageManager, District $district, $url, $id, $name,
         $type = null)
@@ -262,27 +351,11 @@ class CrawlerCommand extends ContainerAwareCommand
             ->setType($type)
             ->setDistrict($district);
         $this->em->persist($community);
-        $this->output->writeln(sprintf('        Community "%s" (ID %d%s) added', $community->getName(), $id,
-            $community->getType() == Community::TYPE_CITY ? ', city' : ''));
+        $this->output->writeln(sprintf('        Community "%s" (ID %d%s) added', $community->getName(),
+            $community->getId(), $community->getType() == Community::TYPE_CITY ? ', city' : ''));
 
-        //$this->updateConstituenciesData($community, $webpageManager, $url);
-
-        return $this;
+        return $community;
     }
-
-    /**r
-     * Updates constituencies' data
-     *
-     * @param Community      $community community
-     * @param WebpageManager $parent    parent
-     * @param string         $url       URL
-     *
-     * @return self
-     */
-//    protected function updateConstituenciesData(Community $community, WebpageManager $parent, $url)
-//    {
-//
-//    }
 
     /**
      * Add error
@@ -307,6 +380,27 @@ class CrawlerCommand extends ContainerAwareCommand
         foreach ($this->errors as $type => $values) {
             $this->output->writeln('- ' . $type . ': ' . implode(', ', $values) . '.');
         }
+    }
+
+    /**
+     * Get previous node
+     *
+     * @param DOMNode      $node node
+     * @param integer      $no   no
+     * @param integer|null $type type
+     *
+     * @return DOMNode|null
+     */
+    protected function getPreviousNode(DOMNode $node, $no = 1, $type = null)
+    {
+        do {
+            $node = $node->previousSibling;
+            if (!isset($type) || $type == $node->nodeType) {
+                $no--;
+            }
+        } while (isset($node) && $no > 0);
+
+        return $node;
     }
 
     /**
@@ -361,14 +455,19 @@ class CrawlerCommand extends ContainerAwareCommand
     /**
      * Get ID from URL
      *
-     * @param string $url URL
+     * @param string  $url  URL
+     * @param integer $idNo ID no (positive - from the beginning, negative - from the end)
      *
      * @return integer
      */
-    protected function getIdFromUrl($url)
+    protected function getIdFromUrl($url, $idNo = -1)
     {
         $parts = explode('/', $url);
-        $id = $this->parseInteger(array_pop($parts));
+        $id = 0;
+        for ($i = abs($idNo); $i > 0; $i--) {
+            $id = $idNo > 0 ? array_shift($parts) : array_pop($parts);
+        }
+        $id = $this->parseInteger($id);
 
         return $id;
     }

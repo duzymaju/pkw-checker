@@ -25,9 +25,6 @@ class Constituency
      *      type = "integer"
      * )
      * @ORM\Id
-     * @ORM\GeneratedValue(
-     *      strategy="AUTO"
-     * )
      */
     protected $id;
 
@@ -40,6 +37,26 @@ class Constituency
      * )
      */
     protected $number;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "candidates_number",
+     *      type = "integer",
+     * )
+     */
+    protected $candidatesNumber;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(
+     *      name = "mandates_number",
+     *      type = "integer",
+     * )
+     */
+    protected $mandatesNumber;
 
     /**
      * @var ArrayCollection
@@ -79,6 +96,20 @@ class Constituency
     }
 
     /**
+     * Set ID
+     *
+     * @param integer $id ID
+     *
+     * @return self
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
      * Get ID
      *
      * @return integer 
@@ -110,6 +141,54 @@ class Constituency
     public function getNumber()
     {
         return $this->number;
+    }
+
+    /**
+     * Set candidates number
+     *
+     * @param integer $candidatesNumber candidates number
+     *
+     * @return self
+     */
+    public function setCandidatesNumber($candidatesNumber)
+    {
+        $this->candidatesNumber = $candidatesNumber;
+
+        return $this;
+    }
+
+    /**
+     * Get candidates number
+     *
+     * @return integer
+     */
+    public function getCandidatesNumber()
+    {
+        return $this->candidatesNumber;
+    }
+
+    /**
+     * Set mandates number
+     *
+     * @param integer $mandatesNumber mandates number
+     *
+     * @return self
+     */
+    public function setMandatesNumber($mandatesNumber)
+    {
+        $this->mandatesNumber = $mandatesNumber;
+
+        return $this;
+    }
+
+    /**
+     * Get mandates number
+     *
+     * @return integer
+     */
+    public function getMandatesNumber()
+    {
+        return $this->mandatesNumber;
     }
 
     /**
