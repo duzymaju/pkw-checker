@@ -35,6 +35,9 @@ class CrawlerCommand extends ContainerAwareCommand
     /** @var array */
     protected $errors = [];
 
+    /** @var array */
+    protected $committeeIds = [];
+
     /**
      * {@inheritdoc}
      */
@@ -64,6 +67,7 @@ class CrawlerCommand extends ContainerAwareCommand
                     TRUNCATE district;
                     TRUNCATE community;
                     TRUNCATE constituency;
+                    TRUNCATE committee;
                     TRUNCATE pooling_station;
                     SET FOREIGN_KEY_CHECKS = 1;
                     COMMIT;
@@ -224,22 +228,26 @@ class CrawlerCommand extends ContainerAwareCommand
     /**
      * Updates committee data
      *
-     * @param WebpageManager $webpageManager        webpage manager
-     * @param string         $url                   URL
-     * @param integer        $id                    ID
-     * @param string         $name                  name
+     * @param WebpageManager $webpageManager webpage manager
+     * @param string         $url            URL
+     * @param integer        $id             ID
+     * @param string         $name           name
      *
-     * @return Committee
+     * @return Committee|null
      */
     protected function updateCommitteeData(WebpageManager $webpageManager, $url, $id, $name)
     {
-        $committee = new Committee();
-        $committee->setId($id)
-            ->setName($name);
-        $this->em->persist($committee);
-        $this->output->writeln(sprintf('    Committee "%s" (ID %d) added', $committee->getName(), $committee->getId()));
+        if (!in_array($id, $this->committeeIds)) {
+            $committee = new Committee();
+            $committee->setId($id)
+                ->setName($name);
+            $this->em->persist($committee);
+            $this->output->writeln(sprintf('    Committee "%s" (ID %d) added', $committee->getName(),
+                $committee->getId()));
+            $this->committeeIds[] = $id;
 
-        return $committee;
+            return $committee;
+        }
     }
 
     /**

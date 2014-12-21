@@ -2,6 +2,13 @@ services:
     pkw_check.alias.manager_service:
         alias:                          doctrine
 
+    pkw_check.repository.committee:
+        arguments:
+            -                           Pkw\CheckBundle\Entity\Committee
+        class:                          Pkw\CheckBundle\Entity\Repository\CommitteeRepository
+        factory_method:                 getRepository
+        factory_service:                pkw_check.alias.manager_service
+
     pkw_check.repository.community:
         arguments:
             -                           Pkw\CheckBundle\Entity\Community
