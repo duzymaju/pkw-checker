@@ -23,9 +23,6 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
  */
 class CrawlerCommand extends ContainerAwareCommand
 {
-    /** @const string */
-    const MAIN_URL = 'http://wybory2014.pkw.gov.pl/pl/';
-
     /** @var EntityManager */
     protected $em;
 
@@ -74,7 +71,8 @@ class CrawlerCommand extends ContainerAwareCommand
                 ');
         }
 
-        $this->updateProvincesData(self::MAIN_URL);
+        $mainUrl = $this->getContainer()->getParameter('main_url');
+        $this->updateProvincesData($mainUrl);
         $this->displayErrors();
         if (!$input->getOption('truncate')) {
             $this->output->writeln('You didn\'t truncate database so primary key duplications are possible!');
@@ -248,6 +246,8 @@ class CrawlerCommand extends ContainerAwareCommand
 
             return $committee;
         }
+
+        return null;
     }
 
     /**

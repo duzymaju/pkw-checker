@@ -19,3 +19,5 @@ parameters:
     debug_toolbar:                      true
     debug_redirects:                    false
     use_assetic_controller:             true
+
+    main_url:                           http://wybory2014.pkw.gov.pl/pl/
