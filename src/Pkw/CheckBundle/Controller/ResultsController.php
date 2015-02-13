@@ -2,6 +2,7 @@
 
 namespace Pkw\CheckBundle\Controller;
 
+use Pkw\CheckBundle\Entity\Province;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,6 +34,12 @@ class ResultsController extends Controller
             ->count();
 
         $provinces = $provincesRepository->findAll();
+
+        // temporary solution:
+        foreach ($provinces as $province) {
+            /** @var Province $province */
+            $pollingStationsNumber += $province->getPollingStationsNumber();
+        }
 
         return $this->render('PkwCheckBundle:Results:homepage.html.twig', array(
             'committeesNumber' => $committeesNumber,

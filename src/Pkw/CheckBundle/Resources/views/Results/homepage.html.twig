@@ -17,7 +17,7 @@
         Lista województw:
         <ul>
             {% for province in provinces %}
-                <li>{{ province.name }}</li>
+                <li>{{ province.name }} (obwodów: {{ province.pollingStationsNumber }})</li>
             {% endfor %}
         </ul>
     </div>
